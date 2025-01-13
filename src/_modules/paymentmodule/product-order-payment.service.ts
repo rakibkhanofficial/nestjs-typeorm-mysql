@@ -35,7 +35,7 @@ export class PaymentService {
       throw new InternalServerErrorException('Stripe configuration error');
     }
     this.stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2024-09-30.acacia',
+      apiVersion: '2024-06-20',
     });
   }
 
