@@ -6,10 +6,6 @@ import { Request, Response } from 'express';
 import { join } from 'path';
 import * as fs from 'fs';
 import * as path from 'path';
-import { config } from 'dotenv';
-
-// Load environment variables from .env file
-config();
 
 function listFiles(dir: string, fileList: string[] = []): string[] {
   const files = fs.readdirSync(dir);
@@ -32,9 +28,6 @@ async function bootstrap(): Promise<NestExpressApplication> {
       Logger.log('Starting application...');
       Logger.log(
         `Files in current directory:\n${listFiles(process.cwd()).join('\n')}`,
-      );
-      Logger.log(
-        `STRIPE_SECRET_KEY: ${process.env.STRIPE_SECRET_KEY ? `${process.env.STRIPE_SECRET_KEY}` : 'Not set'}`,
       );
       app = await NestFactory.create<NestExpressApplication>(AppModule);
       Logger.log('Application created successfully');

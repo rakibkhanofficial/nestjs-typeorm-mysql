@@ -36,7 +36,6 @@ export class AuthController {
         email: user.email,
         phone: user.phone,
         image: user.image,
-        isActive: user.isActive,
         accessToken: tokens.accessToken,
         access_tokenExpiresIn: tokens.access_tokenExpiresIn,
         refreshToken: tokens.refreshToken,
@@ -125,7 +124,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('Customer', 'Admin', 'SuperAdmin', 'Driver', 'CustomerService')
+  @Roles('Customer', 'Admin', 'SuperAdmin', 'DeliveryMan', 'CustomerService')
   @Get('protected')
   protected(@Req() req) {
     return { message: 'This is a protected route', user: req.user };

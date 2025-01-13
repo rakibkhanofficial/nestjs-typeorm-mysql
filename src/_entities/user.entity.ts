@@ -1,7 +1,7 @@
 // src/entities/user.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Car } from './car.entity';
-import { CarBooking } from './car_booking.entity';
+import { Product } from './products.entity';
+import { Order } from './tblorder.entity';
 
 @Entity()
 export class User {
@@ -27,10 +27,13 @@ export class User {
   homeaddress: string;
 
   @Column({ unique: false, nullable: true })
+  homeaddresslocationLink: string;
+
+  @Column({ unique: false, nullable: true })
   officeadress: string;
 
-  @Column({ type: 'boolean', default: true })
-  isActive: boolean;
+  @Column({ unique: false, nullable: true })
+  officeadresslocationLink: string;
 
   @Column()
   password: string;
@@ -38,12 +41,18 @@ export class User {
   @Column({ unique: false })
   role: string;
 
-  @OneToMany(() => Car, (car) => car.user)
-  cars: Car[];
+  @OneToMany(() => Product, (product) => product.user)
+  products: Product[];
 
-  // New OneToMany relation with CarBooking as driver
-  @OneToMany(() => CarBooking, (carBooking) => carBooking.driver)
-  bookings: CarBooking[]; // This will represent the bookings where the user is a driver
+  @OneToMany(() => Order, (order) => order.user)
+  productOrders: Order[];
+
+  // New OneToMany relation with order as Deliveryman
+  @OneToMany(() => Order, (order) => order.deliveryman)
+  deliveries: Order[]; // This will represent the bookings where the user is a Deliveryman
+
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
 
   @Column({ unique: false, nullable: true })
   access_token: string;

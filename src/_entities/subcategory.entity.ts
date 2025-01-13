@@ -1,3 +1,4 @@
+// subcategory.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Category } from './category.entity';
-import { Car } from './car.entity';
+import { Product } from './products.entity';
 
 @Entity('tblSubCategory')
 export class SubCategory {
@@ -33,8 +34,8 @@ export class SubCategory {
   @Column({ nullable: false })
   userId: number;
 
-  @OneToMany(() => Car, (car) => car.subCategory)
-  cars: Car[];
+  @OneToMany(() => Product, (product) => product.subCategory)
+  products: Product[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

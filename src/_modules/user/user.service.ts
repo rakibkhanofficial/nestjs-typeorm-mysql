@@ -11,46 +11,6 @@ export class UserService {
     return this.userRepository.findByEmail(email);
   }
 
-  async getAllDriverList(): Promise<User[] | undefined> {
-    return this.userRepository.find({
-      where: { role: 'Driver' },
-      select: {
-        userId: true,
-        name: true,
-        email: true,
-        phone: true,
-        image: true,
-        birthdaydate: true,
-        homeaddress: true,
-        officeadress: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-  }
-
-  async getAllCustomerList(): Promise<User[] | undefined> {
-    return this.userRepository.find({
-      where: { role: 'Customer' },
-      select: {
-        userId: true,
-        name: true,
-        email: true,
-        phone: true,
-        image: true,
-        birthdaydate: true,
-        homeaddress: true,
-        officeadress: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-  }
-
   async findUserById(id: number): Promise<User | undefined> {
     return this.userRepository.findById(id);
   }
@@ -64,7 +24,9 @@ export class UserService {
       image: string | null;
       birthdaydate: Date | null;
       homeaddress: string | null;
+      homeaddresslocationLink: string | null;
       officeadress: string | null;
+      officeadresslocationLink: string | null;
       createdAt: string;
       updatedAt: string;
     },
@@ -81,7 +43,9 @@ export class UserService {
     user.image = updateData.image;
     user.birthdaydate = updateData.birthdaydate;
     user.homeaddress = updateData.homeaddress;
+    user.homeaddresslocationLink = updateData.homeaddresslocationLink;
     user.officeadress = updateData.officeadress;
+    user.officeadresslocationLink = updateData.officeadresslocationLink;
     // Parse and set dates
     user.createdAt = new Date(updateData.createdAt);
     user.updatedAt = new Date(); // Set to current time

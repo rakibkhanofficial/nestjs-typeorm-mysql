@@ -1,6 +1,7 @@
+// category.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { SubCategory } from './subcategory.entity';
-import { Car } from './car.entity';
+import { Product } from './products.entity';
 
 @Entity('tblCategory')
 export class Category {
@@ -22,8 +23,8 @@ export class Category {
   @OneToMany(() => SubCategory, (subCategory) => subCategory.category)
   subCategories: SubCategory[];
 
-  @OneToMany(() => Car, (car) => car.category)
-  cars: Car[];
+  @OneToMany(() => Product, (product) => product.category)
+  products: Product[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

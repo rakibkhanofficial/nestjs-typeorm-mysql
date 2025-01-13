@@ -1,23 +1,23 @@
-// src/carmodule/car.module.ts
+// src/product/product.module.ts
 
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Car } from '../../_entities/car.entity';
-import { CarService } from './car.service';
-import { CarController } from './car.controller';
+import { Product } from '../../_entities/products.entity';
+import { ProductService } from './products.service';
+import { ProductController } from './products.controller';
 import { AuthModule } from '../auth/auth.module';
 import { CategoryModule } from '../category/category.module';
 import { SubCategoryModule } from '../subcategory/subcategory.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Car]),
+    TypeOrmModule.forFeature([Product]),
     forwardRef(() => AuthModule),
     CategoryModule,
     SubCategoryModule,
   ],
-  providers: [CarService],
-  controllers: [CarController],
-  exports: [CarService],
+  providers: [ProductService],
+  controllers: [ProductController],
+  exports: [ProductService],
 })
-export class CarModule {}
+export class ProductModule {}

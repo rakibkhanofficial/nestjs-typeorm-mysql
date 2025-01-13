@@ -1,3 +1,4 @@
+// product.controller.ts
 import {
   Controller,
   Get,
@@ -14,8 +15,8 @@ import {
 import { Request, Response } from 'express';
 import { success, requestInvalid } from '../../helpers/http';
 import { SUCCESS, REQUEST_ERROR } from '../../shared/constants/httpCodes';
-import { CarDto } from './car.dto';
-import { CarService } from './car.service';
+import { ProductDto } from './products.dto';
+import { ProductService } from './products.service';
 import { TokenValidationGuard } from '../../guards/token-validation.guard';
 import { RolesGuard } from '../auth/jwt/roles.guard';
 import { Roles } from '../auth/jwt/roles.decorator';
@@ -23,29 +24,61 @@ import { Roles } from '../auth/jwt/roles.decorator';
 interface RequestWithUser extends Request {
   user?: {
     userId: number;
+    // Add other properties from your token payload if needed
   };
 }
 
-@Controller('cars')
-export class CarController {
-  constructor(private readonly carService: CarService) {}
+@Controller('products')
+export class ProductController {
+  constructor(private readonly productService: ProductService) {}
+
+  @Get()
+  @UseGuards(TokenValidationGuard, RolesGuard)
+  @Roles('Admin', 'SuperAdmin')
+  async findAll(@Req() request: Request, @Res() response: Response) {
+    try {
+      const products = await this.productService.findAll();
+      return response.status(200).json({
+        statusCode: 200,
+        message: 'Product list was successfully retrieved',
+        data: products,
+      });
+    } catch (error) {
+      return response.status(500).json({
+        statusCode: 500,
+        message: 'An error occurred while fetching the product list',
+        error: error.message,
+      });
+    }
+  }
 
   @Get('public-list')
   async getPublicList(@Req() request: Request, @Res() response: Response) {
     try {
-      const cars = await this.carService.getPublicList();
+      const products = await this.productService.getPublicList();
       return response.status(200).json({
         statusCode: 200,
-        message: 'Car list was successfully retrieved',
-        data: cars,
+        message: 'Product list was successfully retrieved',
+        data: products,
       });
     } catch (error) {
       console.error('Error in getPublicList:', error);
       return response.status(500).json({
         statusCode: 500,
-        message: 'An error occurred while fetching the car list',
+        message: 'An error occurred while fetching the product list',
         error: error.message,
       });
+    }
+  }
+
+  @Get('slugs')
+  async getProductSlugs(@Req() request: Request, @Res() response: Response) {
+    try {
+      const slugs = await this.productService.getProductSlugs();
+      return response.status(SUCCESS).json(success(slugs));
+    } catch (error) {
+      console.log(error);
+      return response.status(REQUEST_ERROR).json(requestInvalid(error));
     }
   }
 
@@ -56,7 +89,7 @@ export class CarController {
     @Param('slug') slug: string,
   ) {
     try {
-      const data = await this.carService.findBySlug(slug);
+      const data = await this.productService.findBySlug(slug);
       return response.status(SUCCESS).json(success(data));
     } catch (error) {
       console.log(error);
@@ -64,64 +97,44 @@ export class CarController {
     }
   }
 
-  @Get()
-  @UseGuards(TokenValidationGuard, RolesGuard)
-  @Roles('Admin', 'SuperAdmin')
-  async findAll(@Req() request: Request, @Res() response: Response) {
-    try {
-      const cars = await this.carService.findAll();
-      return response.status(200).json({
-        statusCode: 200,
-        message: 'Car list was successfully retrieved',
-        data: cars,
-      });
-    } catch (error) {
-      return response.status(500).json({
-        statusCode: 500,
-        message: 'An error occurred while fetching the car list',
-        error: error.message,
-      });
-    }
-  }
-
   @Get('by-category/:categoryId')
-  async getCarsByCategory(
+  async getProductsByCategory(
     @Param('categoryId') categoryId: number,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
-    const result = await this.carService.findByCategory(
+    const result = await this.productService.findByCategory(
       categoryId,
       page,
       limit,
     );
     return {
       ...result,
-      data: result.data.map((car) => ({
-        ...car,
-        categoryName: car.category ? car.category.name : null,
-        subCategoryName: car.subCategory ? car.subCategory.name : null,
+      data: result.data.map((product) => ({
+        ...product,
+        categoryName: product.category ? product.category.name : null,
+        subCategoryName: product.subCategory ? product.subCategory.name : null,
       })),
     };
   }
 
   @Get('by-subcategory/:subCategoryId')
-  async getCarsBySubCategory(
+  async getProductsBySubCategory(
     @Param('subCategoryId') subCategoryId: number,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
-    const result = await this.carService.findBySubCategory(
+    const result = await this.productService.findBySubCategory(
       subCategoryId,
       page,
       limit,
     );
     return {
       ...result,
-      data: result.data.map((car) => ({
-        ...car,
-        categoryName: car.category ? car.category.name : null,
-        subCategoryName: car.subCategory ? car.subCategory.name : null,
+      data: result.data.map((product) => ({
+        ...product,
+        categoryName: product.category ? product.category.name : null,
+        subCategoryName: product.subCategory ? product.subCategory.name : null,
       })),
     };
   }
@@ -135,13 +148,15 @@ export class CarController {
     @Param('id') id: number,
   ) {
     try {
-      const car = await this.carService.findById(id);
+      const product = await this.productService.findById(id);
       return {
         statusCode: SUCCESS,
         data: {
-          ...car,
-          categoryName: car.category ? car.category.name : null,
-          subCategoryName: car.subCategory ? car.subCategory.name : null,
+          ...product,
+          categoryName: product.category ? product.category.name : null,
+          subCategoryName: product.subCategory
+            ? product.subCategory.name
+            : null,
         },
       };
     } catch (error) {
@@ -156,7 +171,7 @@ export class CarController {
   async create(
     @Req() request: RequestWithUser,
     @Res() response: Response,
-    @Body() carDto: CarDto,
+    @Body() productDto: ProductDto,
   ) {
     try {
       if (!request.user || !request.user.userId) {
@@ -164,16 +179,19 @@ export class CarController {
           .status(REQUEST_ERROR)
           .json(requestInvalid('User ID not found in token'));
       }
-      const userId = request.user.userId;
+      const userId = request.user.userId; // Extract userId from the user object attached by TokenValidationGuard
 
-      const existingCar = await this.carService.findByName(carDto.name);
-      if (existingCar) {
+      // Check if category already exists
+      const existingCproduct = await this.productService.findByName(
+        productDto.name,
+      );
+      if (existingCproduct) {
         return response
           .status(REQUEST_ERROR)
-          .json(requestInvalid('Car already exists'));
+          .json(requestInvalid('Product already exists'));
       }
 
-      const data = await this.carService.create(carDto, userId);
+      const data = await this.productService.create(productDto, userId);
       return response.status(SUCCESS).json(success(data));
     } catch (error) {
       console.log(error);
@@ -188,10 +206,10 @@ export class CarController {
     @Req() request: Request,
     @Res() response: Response,
     @Param('id') id: number,
-    @Body() carDto: CarDto,
+    @Body() productDto: ProductDto,
   ) {
     try {
-      const data = await this.carService.update(id, carDto);
+      const data = await this.productService.update(id, productDto);
       return response.status(SUCCESS).json(success(data));
     } catch (error) {
       return response.status(REQUEST_ERROR).json(requestInvalid(error));
@@ -207,10 +225,10 @@ export class CarController {
     @Param('id') id: number,
   ) {
     try {
-      await this.carService.remove(id);
+      await this.productService.remove(id);
       return response
         .status(SUCCESS)
-        .json(success({ message: 'Car deleted successfully' }));
+        .json(success({ message: 'Product deleted successfully' }));
     } catch (error) {
       return response.status(REQUEST_ERROR).json(requestInvalid(error));
     }

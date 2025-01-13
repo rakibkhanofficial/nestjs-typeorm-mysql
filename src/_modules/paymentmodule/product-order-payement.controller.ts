@@ -7,11 +7,11 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { PaymentService } from './payment.service';
 import { TokenValidationGuard } from '../../guards/token-validation.guard';
 import { RolesGuard } from '../auth/jwt/roles.guard';
 import { Roles } from '../auth/jwt/roles.decorator';
-import { CreateCarBookingDto } from '../carbookingModule/car_booking.dto';
+import { PaymentService } from './product-order-payment.service';
+import { CreateOrderDto } from '../product-order/dto/create-product-order.dto';
 
 interface RequestWithUser extends Request {
   user?: {
@@ -52,55 +52,27 @@ export class PaymentController {
     }
   }
 
-  @Post('create-booking-after-payment')
-  @Roles('Customer', 'Admin', 'SuperAdmin')
-  async createBookingAfterPayment(
-    @Body() createCarBookingDto: CreateCarBookingDto,
-    @Req() req: RequestWithUser,
-  ) {
-    try {
-      const booking = await this.paymentService.createBookingAfterPayment(
-        createCarBookingDto,
-        req.user.userId,
-      );
-      return {
-        statusCode: HttpStatus.CREATED,
-        message: 'Booking created successfully after payment',
-        data: booking,
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: 'An error occurred while creating the booking',
-          error: error.message,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
   @Post('confirm-payment')
   @Roles('Customer', 'Admin', 'SuperAdmin')
   async confirmPayment(
-    @Body() body: { bookingId: number; paymentIntentId: string },
+    @Body() body: { orderId: number; paymentIntentId: string },
   ) {
     try {
-      if (!body.bookingId || !body.paymentIntentId) {
+      if (!body.orderId || !body.paymentIntentId) {
         throw new HttpException(
-          'Missing required fields: bookingId or paymentIntentId',
+          'Missing required fields: orderId or paymentIntentId',
           HttpStatus.BAD_REQUEST,
         );
       }
 
       const result = await this.paymentService.confirmPayment(
-        body.bookingId,
+        body.orderId,
         body.paymentIntentId,
       );
 
       return {
         statusCode: HttpStatus.OK,
-        message: 'Payment confirmed and booking updated',
+        message: 'Payment confirmed and order updated',
         data: result,
       };
     } catch (error) {
@@ -111,6 +83,35 @@ export class PaymentController {
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'An error occurred while confirming the payment',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('create-order-after-payment')
+  @Roles('Customer', 'Admin', 'SuperAdmin')
+  async createOrderAfterPayment(
+    @Body() createOrderDto: CreateOrderDto,
+    @Req() req: RequestWithUser,
+  ) {
+    try {
+      const order = await this.paymentService.createOrderAfterPayment(
+        createOrderDto,
+        req.user.userId,
+      );
+
+      return {
+        statusCode: HttpStatus.CREATED,
+        message: 'Order created successfully after payment',
+        data: order,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'An error occurred while creating the order',
           error: error.message,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

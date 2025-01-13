@@ -1,17 +1,18 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { PaymentService } from './payment.service';
-import { PaymentController } from './payment.controller';
-import { CarBooking } from '../../_entities/car_booking.entity';
-import { Car } from '../../_entities/car.entity';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
+import { Product } from '../../_entities/products.entity';
+import { Order } from '../../_entities/tblorder.entity';
+import { PaymentController } from './product-order-payement.controller';
+import { PaymentService } from './product-order-payment.service';
+import { OrderItem } from '../../_entities/tblorderItems.entity';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([CarBooking, Car]),
+    TypeOrmModule.forFeature([Order, OrderItem, Product]),
     forwardRef(() => AuthModule),
     UserModule,
   ],

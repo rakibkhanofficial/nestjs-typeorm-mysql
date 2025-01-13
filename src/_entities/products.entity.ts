@@ -1,24 +1,24 @@
-// src/_entities/car.entity.ts
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Category } from './category.entity';
 import { SubCategory } from './subcategory.entity';
+import { Order } from './tblorder.entity';
 
-@Entity('tblCar')
-export class Car {
+@Entity('tblProduct')
+export class Product {
   @PrimaryGeneratedColumn()
   id: number;
-
   @Column({ nullable: false })
   userId: number;
 
-  @ManyToOne(() => User, (user) => user.cars)
+  @ManyToOne(() => User, (user) => user.products)
   @JoinColumn({ name: 'userId' })
   user: User;
 
@@ -32,66 +32,72 @@ export class Car {
   slug: string;
 
   @Column({ unique: false, type: 'longtext', nullable: true })
-  image: string;
+  prodimage: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
-  pricePerHour: number;
+  price: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
-  pricePerMile: number;
+  offerprice: number;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
-  model: string;
+  packsize: string;
 
-  @Column({ type: 'integer', nullable: false })
-  year: number;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  sku: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  make: string;
+  @Column({ type: 'integer', nullable: false, default: 0 })
+  stockQuantity: number;
 
-  @Column({ type: 'integer', nullable: false })
-  seatingCapacity: number;
-
-  @Column({ type: 'boolean', default: false })
-  hasChildSeat: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  hasWifi: boolean;
-
-  @Column({ type: 'integer', nullable: false })
-  luggageCapacity: number;
-
-  @Column({ type: 'decimal', precision: 5, scale: 1, nullable: false })
-  mileagePerGallon: number;
-
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  transmission: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  fuelType: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  brand: string;
 
   @Column({ type: 'simple-array', nullable: true })
-  features: string[];
-
-  @Column({ type: 'boolean', default: true })
-  isAvailable: boolean;
+  tags: string[];
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
-  @ManyToOne(() => Category, (category) => category.cars)
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  weight: number;
+
+  @Column({ type: 'simple-json', nullable: true })
+  dimensions: { length: number; width: number; height: number };
+
+  @Column({ type: 'simple-array', nullable: true })
+  allergens: string[];
+
+  @Column({ type: 'date', nullable: true })
+  expirationDate: Date;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  barcode: string;
+
+  // In your Product entity
+  @OneToMany(() => Order, (order) => order.product)
+  orders: Order[];
+
+  @ManyToOne(() => Category, (category) => category.products)
   @JoinColumn({ name: 'categoryId' })
   category: Category;
 
   @Column({ nullable: true })
   categoryId: number;
 
-  @ManyToOne(() => SubCategory, (subCategory) => subCategory.cars)
+  @ManyToOne(() => SubCategory, (subCategory) => subCategory.products)
   @JoinColumn({ name: 'subCategoryId' })
   subCategory: SubCategory;
 
   @Column({ nullable: true })
   subCategoryId: number;
+
+  @Column({ type: 'simple-json', nullable: true })
+  nutritionalInfo: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
